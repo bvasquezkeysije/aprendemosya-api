@@ -1,0 +1,39 @@
+package com.aprendemosya.aprendemosya_api.domain.auth.repository;
+
+import com.aprendemosya.aprendemosya_api.domain.auth.dto.LoginResponse;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class AuthQueryRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public AuthQueryRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public Optional<LoginResponse> login(String identifier, String password) {
+        List<LoginResponse> results = jdbcTemplate.query(
+                """
+                        SELECT user_id, username, email, role, active, profile_image_url
+                        FROM fn_auth_login(?, ?)
+                        """,
+                (rs, rowNum) -> new LoginResponse(
+                        rs.getLong("user_id"),
+                        rs.getString("username"),
+                        rs.getString("email"),
+                        rs.getString("role"),
+                        rs.getBoolean("active"),
+                        rs.getString("profile_image_url")
+                ),
+                identifier,
+                password
+        );
+
+        return results.stream().findFirst();
+    }
+}
