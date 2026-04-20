@@ -3,9 +3,12 @@ package com.aprendemosya.aprendemosya_api.domain.auth.controller;
 import com.aprendemosya.aprendemosya_api.common.response.ApiResponse;
 import com.aprendemosya.aprendemosya_api.domain.auth.dto.LoginRequest;
 import com.aprendemosya.aprendemosya_api.domain.auth.dto.LoginResponse;
+import com.aprendemosya.aprendemosya_api.domain.auth.dto.UserProfileResponse;
 import com.aprendemosya.aprendemosya_api.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,5 +33,10 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success("Login correcto", authService.login(request));
+    }
+
+    @GetMapping("/profile/{userId}")
+    public ApiResponse<UserProfileResponse> getProfile(@PathVariable Long userId) {
+        return ApiResponse.success("Perfil cargado", authService.getProfileByUserId(userId));
     }
 }
