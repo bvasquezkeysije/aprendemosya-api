@@ -1,6 +1,7 @@
 package com.aprendemosya.aprendemosya_api.domain.auth.controller;
 
 import com.aprendemosya.aprendemosya_api.common.response.ApiResponse;
+import com.aprendemosya.aprendemosya_api.domain.auth.dto.GoogleCodeLoginRequest;
 import com.aprendemosya.aprendemosya_api.domain.auth.dto.LoginRequest;
 import com.aprendemosya.aprendemosya_api.domain.auth.dto.LoginResponse;
 import com.aprendemosya.aprendemosya_api.domain.auth.dto.UserProfileResponse;
@@ -33,6 +34,14 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success("Login correcto", authService.login(request));
+    }
+
+    @PostMapping("/google")
+    public ApiResponse<LoginResponse> loginWithGoogle(@Valid @RequestBody GoogleCodeLoginRequest request) {
+        return ApiResponse.success(
+                "Login correcto",
+                authService.loginWithGoogleCode(request.code(), request.redirectUri())
+        );
     }
 
     @GetMapping("/profile/{userId}")

@@ -12,15 +12,24 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final AuthQueryRepository authQueryRepository;
+    private final GoogleOAuthUserService googleOAuthUserService;
 
-    public AuthService(AuthQueryRepository authQueryRepository) {
+    public AuthService(
+            AuthQueryRepository authQueryRepository,
+            GoogleOAuthUserService googleOAuthUserService
+    ) {
         this.authQueryRepository = authQueryRepository;
+        this.googleOAuthUserService = googleOAuthUserService;
     }
 
     public LoginResponse login(LoginRequest request) {
         return authQueryRepository
                 .login(request.identifier(), request.password())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Credenciales invalidas"));
+    }
+
+    public LoginResponse loginWithGoogleCode(String code, String redirectUri) {
+        return googleOAuthUserService.loginWithGoogleCode(code, redirectUri);
     }
 
     public UserProfileResponse getProfileByUserId(Long userId) {

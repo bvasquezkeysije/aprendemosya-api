@@ -1,7 +1,5 @@
 package com.aprendemosya.aprendemosya_api.config;
 
-import com.aprendemosya.aprendemosya_api.domain.auth.service.GoogleOAuthUserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,18 +16,6 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    private final GoogleOAuthUserService googleOAuthUserService;
-
-    @Value("${app.auth.google-success-url}")
-    private String googleSuccessUrl;
-
-    @Value("${app.auth.google-failure-url}")
-    private String googleFailureUrl;
-
-    public SecurityConfig(GoogleOAuthUserService googleOAuthUserService) {
-        this.googleOAuthUserService = googleOAuthUserService;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -39,17 +25,6 @@ public class SecurityConfig {
                         .requestMatchers("/", "/error", "/oauth2/**", "/login/**", "/api/**", "/ws/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler((request, response, authentication) -> {
-                            try {
-                                googleOAuthUserService.syncGoogleUser(authentication);
-                                response.sendRedirect(googleSuccessUrl);
-                            } catch (Exception ex) {
-                                response.sendRedirect(googleFailureUrl);
-                            }
-                        })
-                        .failureHandler((request, response, exception) -> response.sendRedirect(googleFailureUrl))
                 );
 
         return http.build();
