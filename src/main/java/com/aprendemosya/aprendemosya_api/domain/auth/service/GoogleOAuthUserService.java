@@ -10,6 +10,7 @@ import com.aprendemosya.aprendemosya_api.domain.user.repository.UserProfileRepos
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ import java.util.UUID;
 
 @Service
 public class GoogleOAuthUserService {
+
+    @NonNull
+    private static final MediaType FORM_URLENCODED = MediaType.APPLICATION_FORM_URLENCODED;
 
     private final RestClient restClient;
     private final AppUserRepository appUserRepository;
@@ -166,19 +170,25 @@ public class GoogleOAuthUserService {
 
         GoogleTokenResponse tokenResponse = restClient.post()
                 .uri("https://oauth2.googleapis.com/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .contentType(FORM_URLENCODED)
                 .body(formData)
                 .retrieve()
                 .body(GoogleTokenResponse.class);
 
-        if (tokenResponse == null || tokenResponse.accessToken() == null || tokenResponse.accessToken().isBlank()) {
+        if (tokenResponse == null) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "No se pudo obtener el token de Google");
+        }
+
+        String accessToken = tokenResponse.accessToken();
+
+        if (accessToken == null || accessToken.isBlank()) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "No se pudo obtener el token de Google");
         }
 
         return tokenResponse;
     }
 
-    private GoogleUserInfoResponse fetchUserInfo(String accessToken) {
+    private GoogleUserInfoResponse fetchUserInfo(@NonNull String accessToken) {
         GoogleUserInfoResponse userInfo = restClient.get()
                 .uri("https://openidconnect.googleapis.com/v1/userinfo")
                 .headers(headers -> headers.setBearerAuth(accessToken))
