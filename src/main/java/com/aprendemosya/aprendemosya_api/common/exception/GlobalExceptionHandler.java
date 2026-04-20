@@ -2,6 +2,7 @@ package com.aprendemosya.aprendemosya_api.common.exception;
 
 import com.aprendemosya.aprendemosya_api.common.response.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,8 +13,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
+        HttpStatusCode status = ex.getStatus();
+
         return ResponseEntity
-                .status(ex.getStatus())
+                .status(status)
                 .body(new ApiResponse<>(false, ex.getMessage(), null, java.time.Instant.now()));
     }
 
